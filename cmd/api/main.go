@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -25,8 +26,18 @@ func main() {
 	}
 	defer db.Close()
 
+	chaosCfg := config.ChaosConfig{
+		Enabled:          true,
+		ErrorProbability: 0.2,
+		DelayProbability: 0.3,
+		MaxDelay:         500 * time.Millisecond,
+	}
+
 	// --- init repositories (adapters) ---
-	paymentRepo := sqlite.NewPaymentRepository(db)
+	paymentRepo := sqlite.NewPaymentRepositoryChaos(
+		sqlite.NewPaymentRepository(db),
+		chaosCfg,
+	)
 
 	// --- init usecases ---
 	createPaymentUC := usecase.NewCreatePaymentUsecase(paymentRepo)
