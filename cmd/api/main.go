@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -12,6 +14,7 @@ import (
 	"payment-service/internal/core/usecase"
 	"payment-service/internal/http/handler"
 	"payment-service/internal/http/router"
+	"payment-service/internal/observability"
 )
 
 func main() {
@@ -53,6 +56,16 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+
+	// Set up OpenTelemetry.
+	otelShutdown, err := observability.SetupOTelSDK(context.Background())
+	if err != nil {
+		log.Fatalf("failed to setup telemetry: %v", err)
+	}
+	// Handle shutdown properly so nothing leaks.
+	defer func() {
+		err = errors.Join(err, otelShutdown(context.Background()))
+	}()
 
 	// --- register routes ---
 	router.Register(r, paymentHandler)
