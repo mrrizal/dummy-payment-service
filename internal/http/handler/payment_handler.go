@@ -21,15 +21,31 @@ type createPaymentResponse struct {
 	Status    string `json:"status"`
 }
 
+type getPaymentResponse struct {
+	PaymentID string `json:"payment_id"`
+	OrderID   string `json:"order_id"`
+	PayerID   int    `json:"payer_id"`
+	Amount    int    `json:"amount"`
+	Currency  string `json:"currency"`
+	Status    string `json:"status"`
+	Provider  string `json:"provider"`
+	Method    string `json:"method"`
+	CreatedAt string `json:"created_at"`
+	PaidAt    string `json:"paid_at,omitempty"`
+}
+
 type PaymentHandler struct {
 	createPaymentUC *usecase.CreatePaymentUsecase
+	getPaymentUC    *usecase.GetPaymentUsecase
 }
 
 func NewPaymentHandler(
 	createPaymentUC *usecase.CreatePaymentUsecase,
+	getPaymentUC *usecase.GetPaymentUsecase,
 ) *PaymentHandler {
 	return &PaymentHandler{
 		createPaymentUC: createPaymentUC,
+		getPaymentUC:    getPaymentUC,
 	}
 }
 
@@ -73,5 +89,37 @@ func (h *PaymentHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusAccepted, createPaymentResponse{
 		PaymentID: output.PaymentID,
 		Status:    string(output.Status),
+	})
+}
+
+func (h *PaymentHandler) Get(c *gin.Context) {
+	publicID := c.Param("public_id")
+	payment, err := h.getPaymentUC.Execute(
+		c.Request.Context(),
+		publicID,
+	)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var paidAt string
+	if payment.PaidAt != nil {
+		paidAt = payment.PaidAt.Format("2006-01-02T15:04:05Z07:00")
+	}
+
+	c.JSON(http.StatusOK, getPaymentResponse{
+		PaymentID: payment.PublicID,
+		OrderID:   payment.OrderID,
+		PayerID:   payment.PayerID,
+		Amount:    payment.Amount,
+		Currency:  payment.Currency,
+		Status:    string(payment.Status),
+		Provider:  payment.Provider,
+		Method:    payment.Method,
+		CreatedAt: payment.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		PaidAt:    paidAt,
 	})
 }

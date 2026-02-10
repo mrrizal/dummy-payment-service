@@ -103,3 +103,50 @@ func (r *paymentRepository) FindByIdempotencyKey(
 
 	return &p, nil
 }
+
+func (r *paymentRepository) FindbyPublicID(
+	ctx context.Context,
+	publicID string,
+) (*domain.Payment, error) {
+
+	query := `
+	SELECT
+		id, public_id, order_id, payer_id,
+		amount, currency, status,
+		provider, method, idempotency_key,
+		created_at, updated_at, paid_at
+	FROM payments
+	WHERE public_id = ?
+	`
+
+	row := r.db.QueryRowContext(ctx, query, publicID)
+
+	var p domain.Payment
+	var paidAt sql.NullTime
+
+	err := row.Scan(
+		&p.ID,
+		&p.PublicID,
+		&p.OrderID,
+		&p.PayerID,
+		&p.Amount,
+		&p.Currency,
+		&p.Status,
+		&p.Provider,
+		&p.Method,
+		&p.IdempotencyKey,
+		&p.CreatedAt,
+		&p.UpdatedAt,
+		&paidAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if paidAt.Valid {
+		p.PaidAt = &paidAt.Time
+	}
+
+	return &p, nil
+}

@@ -30,9 +30,13 @@ func main() {
 
 	// --- init usecases ---
 	createPaymentUC := usecase.NewCreatePaymentUsecase(paymentRepo)
+	getPaymentUC := usecase.NewGetPaymentUsecase(paymentRepo)
 
 	// --- init handlers ---
-	paymentHandler := handler.NewPaymentHandler(createPaymentUC)
+	paymentHandler := handler.NewPaymentHandler(
+		createPaymentUC,
+		getPaymentUC,
+	)
 
 	// --- init gin ---
 	r := gin.New()

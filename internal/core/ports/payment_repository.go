@@ -11,4 +11,8 @@ type PaymentRepository interface {
 		ctx context.Context,
 		idempotencyKey string,
 	) (*domain.Payment, error)
+	FindbyPublicID(
+		ctx context.Context,
+		publicID string,
+	) (*domain.Payment, error)
 }

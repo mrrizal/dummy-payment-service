@@ -12,6 +12,7 @@ func Register(r *gin.Engine, paymentHandler *handler.PaymentHandler) {
 		payments := v1.Group("/payments")
 		{
 			payments.POST("", paymentHandler.Create)
+			payments.GET("/:public_id", paymentHandler.Get)
 		}
 	}
 }
