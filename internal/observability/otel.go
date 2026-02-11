@@ -10,7 +10,8 @@ import (
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/metric"
-	"go.opentelemetry.io/otel/sdk/trace"
+	traceSDK "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // setupOTelSDK bootstraps the OpenTelemetry pipeline.
@@ -68,16 +69,16 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-func newTracerProvider() (*trace.TracerProvider, error) {
+func newTracerProvider() (*traceSDK.TracerProvider, error) {
 	traceExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 	if err != nil {
 		return nil, err
 	}
 
-	tracerProvider := trace.NewTracerProvider(
-		trace.WithBatcher(traceExporter,
+	tracerProvider := traceSDK.NewTracerProvider(
+		traceSDK.WithBatcher(traceExporter,
 			// Default is 5s. Set to 1s for demonstrative purposes.
-			trace.WithBatchTimeout(time.Second)),
+			traceSDK.WithBatchTimeout(time.Second)),
 	)
 	return tracerProvider, nil
 }
@@ -94,4 +95,14 @@ func newMeterProvider() (*metric.MeterProvider, error) {
 			metric.WithInterval(3*time.Second))),
 	)
 	return meterProvider, nil
+}
+
+var tracer trace.Tracer
+
+func InitTracer(serviceName string) {
+	tracer = otel.Tracer(serviceName)
+}
+
+func Tracer() trace.Tracer {
+	return tracer
 }

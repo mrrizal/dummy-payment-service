@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"payment-service/internal/core/domain"
 	"payment-service/internal/core/ports"
+	"payment-service/internal/observability"
 	"time"
 )
 
@@ -108,6 +109,11 @@ func (r *paymentRepository) FindbyPublicID(
 	ctx context.Context,
 	publicID string,
 ) (*domain.Payment, error) {
+	ctx, span := observability.Tracer().Start(
+		ctx,
+		"paymentRepository.FindbyPublicID",
+	)
+	defer span.End()
 
 	query := `
 	SELECT

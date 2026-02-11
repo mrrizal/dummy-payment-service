@@ -1,8 +1,5 @@
 run:
-	go run cmd/api/main.go
+	./payment-service
 
 build:
-	go build -o dummy-payment-service cmd/api/main.go
-
-run-build:
-	./dummy-payment-service
+	go build -o payment-service cmd/api/main.go

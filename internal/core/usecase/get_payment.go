@@ -4,6 +4,7 @@ import (
 	"context"
 	"payment-service/internal/core/domain"
 	"payment-service/internal/core/ports"
+	"payment-service/internal/observability"
 )
 
 type GetPaymentUsecase struct {
@@ -22,6 +23,9 @@ func (uc *GetPaymentUsecase) Execute(
 	ctx context.Context,
 	publicID string,
 ) (*domain.Payment, error) {
+	ctx, span := observability.Tracer().Start(ctx, "GetPaymentUseCase.Execute")
+	defer span.End()
+
 	payment, err := uc.paymentRepo.FindbyPublicID(
 		ctx,
 		publicID,

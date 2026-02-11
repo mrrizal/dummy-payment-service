@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"payment-service/internal/core/usecase"
+	"payment-service/internal/observability"
 
 	"github.com/gin-gonic/gin"
 )
@@ -93,9 +94,13 @@ func (h *PaymentHandler) Create(c *gin.Context) {
 }
 
 func (h *PaymentHandler) Get(c *gin.Context) {
+	ctx := c.Request.Context()
+	ctx, span := observability.Tracer().Start(ctx, "PaymentHandler.GET")
+	defer span.End()
+
 	publicID := c.Param("public_id")
 	payment, err := h.getPaymentUC.Execute(
-		c.Request.Context(),
+		ctx,
 		publicID,
 	)
 	if err != nil {

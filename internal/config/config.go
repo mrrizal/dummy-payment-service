@@ -7,7 +7,8 @@ type databaseConfig struct {
 }
 
 type appConfig struct {
-	Port string
+	Port        string
+	ServiceName string
 }
 
 type Config struct {
@@ -28,6 +29,9 @@ func LoadConfig() Config {
 
 	return Config{
 		Database: databaseConfig{DSN: dsn},
-		App:      appConfig{Port: port},
+		App: appConfig{
+			Port:        port,
+			ServiceName: "payment-service",
+		},
 	}
 }

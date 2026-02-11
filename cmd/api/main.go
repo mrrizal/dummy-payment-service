@@ -15,12 +15,29 @@ import (
 	"payment-service/internal/http/handler"
 	"payment-service/internal/http/router"
 	"payment-service/internal/observability"
+
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 func main() {
 	fmt.Println("Starting Payment Service...")
+	ctx := context.Background()
+
 	// --- load config ---
 	cfg := config.LoadConfig()
+
+	// Set up OpenTelemetry.
+	otelShutdown, err := observability.SetupOTelSDK(ctx)
+	if err != nil {
+		log.Fatalf("failed to setup telemetry: %v", err)
+	}
+	// Handle shutdown properly so nothing leaks.
+	defer func() {
+		err = errors.Join(err, otelShutdown(context.Background()))
+	}()
+
+	// init tracker
+	observability.InitTracer(cfg.App.ServiceName)
 
 	// --- init database (SQLite) ---
 	db, err := sqlite.New(cfg.Database.DSN)
@@ -56,16 +73,7 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-
-	// Set up OpenTelemetry.
-	otelShutdown, err := observability.SetupOTelSDK(context.Background())
-	if err != nil {
-		log.Fatalf("failed to setup telemetry: %v", err)
-	}
-	// Handle shutdown properly so nothing leaks.
-	defer func() {
-		err = errors.Join(err, otelShutdown(context.Background()))
-	}()
+	r.Use(otelgin.Middleware(cfg.App.ServiceName))
 
 	// --- register routes ---
 	router.Register(r, paymentHandler)

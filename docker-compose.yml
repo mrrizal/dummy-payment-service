@@ -1,0 +1,28 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    container_name: jaeger
+    ports:
+      - "16686:16686" # UI
+      - "4318:4318" # OTLP HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payment-service
+    depends_on:
+      - jaeger
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - OTEL_SERVICE_NAME=payment-service
+      - PORT=${APP_PORT}
+    ports:
+      - "${APP_PORT}:8080"
+    volumes:
+      - ./payments.db:/app/payments.db
+    restart: unless-stopped
+
