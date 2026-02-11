@@ -8,11 +8,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"payment-service/internal/adapters/sqlite"
 	"payment-service/internal/config"
 	"payment-service/internal/core/usecase"
 	"payment-service/internal/http/handler"
+	"payment-service/internal/http/middleware"
 	"payment-service/internal/http/router"
 	"payment-service/internal/observability"
 
@@ -38,6 +40,9 @@ func main() {
 
 	// init tracker
 	observability.InitTracer(cfg.App.ServiceName)
+
+	// init metric
+	observability.InitMetrics()
 
 	// --- init database (SQLite) ---
 	db, err := sqlite.New(cfg.Database.DSN)
@@ -74,9 +79,11 @@ func main() {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(otelgin.Middleware(cfg.App.ServiceName))
+	r.Use(middleware.MetricsMiddleware())
 
 	// --- register routes ---
 	router.Register(r, paymentHandler)
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// --- start server ---
 	log.Printf("starting http server on :%s", cfg.App.Port)

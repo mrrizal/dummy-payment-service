@@ -1,12 +1,39 @@
 services:
-  jaeger:
-    image: jaegertracing/all-in-one:1.76.0
-    container_name: jaeger
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./internal/observability/tempo.yaml:/etc/tempo.yaml
     ports:
-      - "16686:16686" # UI
-      - "4318:4318" # OTLP HTTP
+      - "3200:3200"   # tempo API
+      - "4318:4318"   # OTLP HTTP
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    volumes:
+      - ./internal/observability/prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  loki:
+    image: grafana/loki:2.9.8
+    command: -config.file=/etc/loki/loki.yaml
+    volumes:
+      - ./internal/observability/loki.yaml:/etc/loki/loki.yaml
+    ports:
+      - "3100:3100"
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - tempo
     environment:
-      - COLLECTOR_OTLP_ENABLED=true
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     restart: unless-stopped
 
   payment-service:
@@ -15,14 +42,16 @@ services:
       dockerfile: Dockerfile
     container_name: payment-service
     depends_on:
-      - jaeger
+      - tempo
     environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318
       - OTEL_SERVICE_NAME=payment-service
       - PORT=${APP_PORT}
     ports:
       - "${APP_PORT}:8080"
     volumes:
       - ./payments.db:/app/payments.db
+    logging:
+      driver: "json-file"
     restart: unless-stopped
 

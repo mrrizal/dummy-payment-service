@@ -7,6 +7,7 @@ import (
 	"payment-service/internal/config"
 	"payment-service/internal/core/domain"
 	"payment-service/internal/core/ports"
+	"payment-service/internal/observability"
 )
 
 type PaymentRepositoryChaos struct {
@@ -66,6 +67,8 @@ func (r *PaymentRepositoryChaos) FindbyPublicID(
 	ctx context.Context,
 	publicID string,
 ) (*domain.Payment, error) {
+	ctx, span := observability.Tracer().Start(ctx, "PaymentRepositoryChaos.FindbyPublicID")
+	defer span.End()
 
 	if r.cfg.Enabled {
 		chaos.MaybeDelay(
