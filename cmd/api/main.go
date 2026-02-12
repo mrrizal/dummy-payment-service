@@ -59,9 +59,15 @@ func main() {
 	}
 
 	// --- init repositories (adapters) ---
-	paymentRepo := sqlite.NewPaymentRepositoryChaos(
-		sqlite.NewPaymentRepository(db),
+	defaultPaymentRepo := sqlite.NewPaymentRepository(db)
+
+	paymentRepoChaos := sqlite.NewPaymentRepositoryChaos(
+		defaultPaymentRepo,
 		chaosCfg,
+	)
+
+	paymentRepo := sqlite.NewPaymentRepositoryMetrics(
+		paymentRepoChaos,
 	)
 
 	// --- init usecases ---
