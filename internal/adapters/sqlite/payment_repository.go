@@ -18,6 +18,9 @@ func NewPaymentRepository(db *sql.DB) ports.PaymentRepository {
 }
 
 func (r *paymentRepository) Create(ctx context.Context, p *domain.Payment) error {
+	ctx, span := observability.Tracer().Start(ctx, "paymentRepository.Create")
+	defer span.End()
+
 	now := time.Now()
 
 	p.CreatedAt = now
@@ -62,6 +65,8 @@ func (r *paymentRepository) FindByIdempotencyKey(
 	ctx context.Context,
 	key string,
 ) (*domain.Payment, error) {
+	ctx, span := observability.Tracer().Start(ctx, "paymentRepository.FindByIdempotencyKey")
+	defer span.End()
 
 	query := `
 	SELECT

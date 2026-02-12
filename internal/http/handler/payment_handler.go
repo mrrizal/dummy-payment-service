@@ -51,6 +51,10 @@ func NewPaymentHandler(
 }
 
 func (h *PaymentHandler) Create(c *gin.Context) {
+	ctx := c.Request.Context()
+	ctx, span := observability.Tracer().Start(ctx, "PaymentHandler.Create")
+	defer span.End()
+
 	var req createPaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

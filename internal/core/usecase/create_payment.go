@@ -5,6 +5,7 @@ import (
 	"errors"
 	"payment-service/internal/core/domain"
 	"payment-service/internal/core/ports"
+	"payment-service/internal/observability"
 	"strings"
 	"time"
 
@@ -65,6 +66,8 @@ func (uc *CreatePaymentUsecase) Execute(
 	ctx context.Context,
 	input CreatePaymentInput,
 ) (*CreatePaymentOutput, error) {
+	ctx, span := observability.Tracer().Start(ctx, "CreatePaymentUseCase.Execute")
+	defer span.End()
 
 	// --- validate input ---
 	if valid, err := isValidPaymentInput(input); !valid {

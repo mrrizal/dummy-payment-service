@@ -29,6 +29,8 @@ func (r *PaymentRepositoryChaos) Create(
 	ctx context.Context,
 	payment *domain.Payment,
 ) error {
+	ctx, span := observability.Tracer().Start(ctx, "PaymentRepositoryChaos.Create")
+	defer span.End()
 
 	if r.cfg.Enabled {
 		chaos.MaybeDelay(
@@ -48,6 +50,8 @@ func (r *PaymentRepositoryChaos) FindByIdempotencyKey(
 	ctx context.Context,
 	idempotencyKey string,
 ) (*domain.Payment, error) {
+	ctx, span := observability.Tracer().Start(ctx, "PaymentRepositoryChaos.FindByIdempotencyKey")
+	defer span.End()
 
 	if r.cfg.Enabled {
 		chaos.MaybeDelay(
