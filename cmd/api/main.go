@@ -22,7 +22,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
-func main() {
+func run() error {
 	fmt.Println("Starting Payment Service...")
 	ctx := context.Background()
 
@@ -32,11 +32,11 @@ func main() {
 	// Set up OpenTelemetry.
 	otelShutdown, err := observability.SetupOTelSDK(ctx)
 	if err != nil {
-		log.Fatalf("failed to setup telemetry: %v", err)
+		return fmt.Errorf("failed to setup telemetry: %w", err)
 	}
 	// Handle shutdown properly so nothing leaks.
 	defer func() {
-		err = errors.Join(err, otelShutdown(context.Background()))
+		_ = errors.Join(err, otelShutdown(context.Background()))
 	}()
 
 	// init tracker
@@ -48,7 +48,7 @@ func main() {
 	// --- init database (SQLite) ---
 	db, err := sqlite.New(cfg.Database.DSN)
 	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
+		return fmt.Errorf("failed to connect database: %w", err)
 	}
 	defer db.Close()
 
@@ -99,6 +99,13 @@ func main() {
 	// --- start server ---
 	log.Printf("starting http server on :%s", cfg.App.Port)
 	if err := r.Run(":" + cfg.App.Port); err != nil {
-		log.Fatalf("failed to start server: %v", err)
+		return fmt.Errorf("failed to start server: %w", err)
+	}
+	return nil
+}
+
+func main() {
+	if err := run(); err != nil {
+		log.Fatalf("application error: %v", err)
 	}
 }
