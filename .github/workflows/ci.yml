@@ -59,3 +59,15 @@ jobs:
 
       - name: Docker Build Check
         run: docker build -t payment-service-test .
+
+      - name: Scan Docker Image (Trivy)
+        uses: aquasecurity/trivy-action@0.20.0
+        if: github.event_name != 'pull_request'
+        with:
+          image-ref: payment-service-test
+          format: table
+          exit-code: 1
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+
