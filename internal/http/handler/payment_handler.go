@@ -62,6 +62,7 @@ func (h *PaymentHandler) Create(c *gin.Context) {
 		})
 		return
 	}
+	c.Set("payment_method", req.Method)
 
 	// 🔑 Idempotency-Key wajib dari header
 	idempotencyKey := c.GetHeader("Idempotency-Key")

@@ -5,6 +5,8 @@ import (
 	"payment-service/internal/core/domain"
 	"payment-service/internal/core/ports"
 	"payment-service/internal/observability"
+
+	"go.opentelemetry.io/otel/codes"
 )
 
 type GetPaymentUsecase struct {
@@ -31,6 +33,8 @@ func (uc *GetPaymentUsecase) Execute(
 		publicID,
 	)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	return payment, nil

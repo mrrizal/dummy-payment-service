@@ -32,6 +32,8 @@ func (r *PaymentRepositoryChaos) Create(
 	ctx, span := observability.Tracer().Start(ctx, "PaymentRepositoryChaos.Create")
 	defer span.End()
 
+	r.cfg.Enabled = false
+
 	if r.cfg.Enabled {
 		chaos.MaybeDelay(
 			r.cfg.DelayProbability,

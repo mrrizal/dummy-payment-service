@@ -18,16 +18,28 @@ func MetricsMiddleware() gin.HandlerFunc {
 		status := strconv.Itoa(c.Writer.Status())
 		path := c.FullPath()
 
+		// default value
+		paymentMethod := "n/a"
+
+		// ambil dari context kalau ada
+		if pm, exists := c.Get("payment_method"); exists {
+			if val, ok := pm.(string); ok {
+				paymentMethod = val
+			}
+		}
+
 		observability.HTTPRequests.WithLabelValues(
 			c.Request.Method,
 			path,
 			status,
+			paymentMethod,
 		).Inc()
 
 		observability.HTTPDuration.WithLabelValues(
 			c.Request.Method,
 			path,
 			status,
+			paymentMethod,
 		).Observe(duration)
 
 	}

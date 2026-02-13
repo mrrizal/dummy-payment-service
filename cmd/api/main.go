@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	"payment-service/internal/adapters/provider"
 	"payment-service/internal/adapters/sqlite"
 	"payment-service/internal/config"
 	"payment-service/internal/core/usecase"
@@ -68,8 +69,14 @@ func main() {
 		chaosCfg,
 	)
 
+	// --- payment provider
+	paymentProvider := provider.NewFakePaymentProvider()
+
 	// --- init usecases ---
-	createPaymentUC := usecase.NewCreatePaymentUsecase(paymentRepo)
+	createPaymentUC := usecase.NewCreatePaymentUsecase(
+		paymentRepo,
+		paymentProvider,
+	)
 	getPaymentUC := usecase.NewGetPaymentUsecase(paymentRepo)
 
 	// --- init handlers ---

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type CreatePaymentInput struct {
@@ -28,14 +29,17 @@ type CreatePaymentOutput struct {
 }
 
 type CreatePaymentUsecase struct {
-	paymentRepo ports.PaymentRepository
+	paymentRepo     ports.PaymentRepository
+	paymentProvider ports.PaymentProvider
 }
 
 func NewCreatePaymentUsecase(
 	paymentRepo ports.PaymentRepository,
+	paymentProvider ports.PaymentProvider,
 ) *CreatePaymentUsecase {
 	return &CreatePaymentUsecase{
-		paymentRepo: paymentRepo,
+		paymentRepo:     paymentRepo,
+		paymentProvider: paymentProvider,
 	}
 }
 
@@ -71,6 +75,14 @@ func (uc *CreatePaymentUsecase) Execute(
 
 	// --- validate input ---
 	if valid, err := isValidPaymentInput(input); !valid {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	if err := uc.paymentProvider.Process(ctx, input.Method); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 

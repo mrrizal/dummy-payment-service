@@ -10,7 +10,7 @@ var (
 			Name: "http_requests_total",
 			Help: "Total number of HTTP requests",
 		},
-		[]string{"method", "path", "status"},
+		[]string{"method", "path", "status", "payment_method"},
 	)
 
 	HTTPDuration = prometheus.NewHistogramVec(
@@ -19,7 +19,7 @@ var (
 			Help:    "HTTP request latency",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"method", "path", "status"},
+		[]string{"method", "path", "status", "payment_method"},
 	)
 
 	DBQueryDuration = prometheus.NewHistogramVec(
