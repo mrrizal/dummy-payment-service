@@ -55,19 +55,17 @@ func main() {
 		Enabled:          true,
 		ErrorProbability: 0.2,
 		DelayProbability: 0.3,
-		MaxDelay:         500 * time.Millisecond,
+		MaxDelay:         700 * time.Millisecond,
 	}
 
 	// --- init repositories (adapters) ---
 	defaultPaymentRepo := sqlite.NewPaymentRepository(db)
-
-	paymentRepoChaos := sqlite.NewPaymentRepositoryChaos(
+	paymentRepoWithMetrics := sqlite.NewPaymentRepositoryMetrics(
 		defaultPaymentRepo,
-		chaosCfg,
 	)
-
-	paymentRepo := sqlite.NewPaymentRepositoryMetrics(
-		paymentRepoChaos,
+	paymentRepo := sqlite.NewPaymentRepositoryChaos(
+		paymentRepoWithMetrics,
+		chaosCfg,
 	)
 
 	// --- init usecases ---

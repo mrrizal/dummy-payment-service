@@ -3,6 +3,8 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"math/rand/v2"
 	"payment-service/internal/core/domain"
 	"payment-service/internal/core/ports"
 	"payment-service/internal/observability"
@@ -22,6 +24,10 @@ func (r *paymentRepository) Create(ctx context.Context, p *domain.Payment) error
 	defer span.End()
 
 	now := time.Now()
+
+	if rand.Float64() < 0.2 {
+		return errors.New("simulated db error")
+	}
 
 	p.CreatedAt = now
 	p.UpdatedAt = now
@@ -67,6 +73,10 @@ func (r *paymentRepository) FindByIdempotencyKey(
 ) (*domain.Payment, error) {
 	ctx, span := observability.Tracer().Start(ctx, "paymentRepository.FindByIdempotencyKey")
 	defer span.End()
+
+	if rand.Float64() < 0.2 {
+		return &domain.Payment{}, errors.New("simulated db error")
+	}
 
 	query := `
 	SELECT
@@ -119,6 +129,10 @@ func (r *paymentRepository) FindbyPublicID(
 		"paymentRepository.FindbyPublicID",
 	)
 	defer span.End()
+
+	if rand.Float64() < 0.2 {
+		return &domain.Payment{}, errors.New("simulated db error")
+	}
 
 	query := `
 	SELECT
