@@ -49,7 +49,7 @@ jobs:
 
       - name: Security Scan (gosec)
         run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@v2.20.0
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.21.0
           gosec ./...
 
       - name: Vulnerability Check (govulncheck)
