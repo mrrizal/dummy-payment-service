@@ -18,7 +18,7 @@ func NewFakePaymentProvider() ports.PaymentProvider {
 }
 
 func (p *FakeProvider) Process(ctx context.Context, method string) error {
-	ctx, span := observability.Tracer().
+	_, span := observability.Tracer().
 		Start(ctx, "PaymentProvider.Process")
 	defer span.End()
 
