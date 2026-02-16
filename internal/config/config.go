@@ -9,6 +9,7 @@ type databaseConfig struct {
 type appConfig struct {
 	Port        string
 	ServiceName string
+	Version     string
 }
 
 type Config struct {
@@ -27,11 +28,17 @@ func LoadConfig() Config {
 		dsn = "file:payments.db"
 	}
 
+	version := os.Getenv("VERSION")
+	if version == "" {
+		version = "1.0.0"
+	}
+
 	return Config{
 		Database: databaseConfig{DSN: dsn},
 		App: appConfig{
 			Port:        port,
 			ServiceName: "payment-service",
+			Version:     version,
 		},
 	}
 }

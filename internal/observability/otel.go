@@ -10,7 +10,9 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
 	traceSDK "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -62,6 +64,7 @@ func newPropagator() propagation.TextMapPropagator {
 
 func newTracerProvider(ctx context.Context) (*traceSDK.TracerProvider, error) {
 	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	version := os.Getenv("VERSION")
 
 	traceExporter, err := otlptracehttp.New(
 		ctx,
@@ -72,10 +75,22 @@ func newTracerProvider(ctx context.Context) (*traceSDK.TracerProvider, error) {
 		return nil, err
 	}
 
+	res, err := resource.New(
+		ctx,
+		resource.WithAttributes(
+			semconv.ServiceName("payment-service"),
+			semconv.ServiceVersion(version),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	tracerProvider := traceSDK.NewTracerProvider(
 		traceSDK.WithBatcher(traceExporter,
 			// Default is 5s. Set to 1s for demonstrative purposes.
 			traceSDK.WithBatchTimeout(time.Second)),
+		traceSDK.WithResource(res),
 	)
 	return tracerProvider, nil
 }

@@ -44,6 +44,7 @@ func run() error {
 	observability.InitTracer(cfg.App.ServiceName)
 
 	// init metric
+	observability.ServiceVersion = cfg.App.Version
 	observability.InitMetrics()
 
 	// --- init database (SQLite) ---

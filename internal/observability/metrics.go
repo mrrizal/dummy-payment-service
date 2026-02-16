@@ -10,7 +10,7 @@ var (
 			Name: "http_requests_total",
 			Help: "Total number of HTTP requests",
 		},
-		[]string{"method", "path", "status", "payment_method"},
+		[]string{"version", "method", "path", "status", "payment_method"},
 	)
 
 	HTTPDuration = prometheus.NewHistogramVec(
@@ -19,7 +19,7 @@ var (
 			Help:    "HTTP request latency",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"method", "path", "status", "payment_method"},
+		[]string{"version", "method", "path", "status", "payment_method"},
 	)
 
 	DBQueryDuration = prometheus.NewHistogramVec(
@@ -28,7 +28,7 @@ var (
 			Help:    "Database query latency",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"operation"},
+		[]string{"version", "operation"},
 	)
 
 	DBErrors = prometheus.NewCounterVec(
@@ -36,9 +36,11 @@ var (
 			Name: "db_errors_total",
 			Help: "Total database errors",
 		},
-		[]string{"operation"},
+		[]string{"version", "operation"},
 	)
 )
+
+var ServiceVersion string
 
 func InitMetrics() {
 	prometheus.MustRegister(HTTPRequests)
