@@ -25,6 +25,7 @@ func (r *paymentRepository) Create(ctx context.Context, p *domain.Payment) error
 
 	now := time.Now()
 
+	// nolint:gosec // G404: math/rand is sufficient for chaos injection
 	if rand.Float64() < 0.2 {
 		return errors.New("simulated db error")
 	}
@@ -74,6 +75,7 @@ func (r *paymentRepository) FindByIdempotencyKey(
 	ctx, span := observability.Tracer().Start(ctx, "paymentRepository.FindByIdempotencyKey")
 	defer span.End()
 
+	// nolint:gosec // G404: math/rand is sufficient for chaos injection
 	if rand.Float64() < 0.2 {
 		return &domain.Payment{}, errors.New("simulated db error")
 	}
@@ -130,6 +132,7 @@ func (r *paymentRepository) FindbyPublicID(
 	)
 	defer span.End()
 
+	// nolint:gosec // G404: math/rand is sufficient for chaos injection
 	if rand.Float64() < 0.2 {
 		return &domain.Payment{}, errors.New("simulated db error")
 	}
