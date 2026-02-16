@@ -73,7 +73,7 @@ jobs:
 
       - name: Scan Docker Image (Trivy)
         uses: aquasecurity/trivy-action@0.20.0
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
         with:
           image-ref: payment-service-test:latest
           format: table
