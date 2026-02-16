@@ -74,7 +74,7 @@ func (h *PaymentHandler) Create(c *gin.Context) {
 	}
 
 	output, err := h.createPaymentUC.Execute(
-		c.Request.Context(),
+		ctx,
 		usecase.CreatePaymentInput{
 			OrderID:        req.OrderID,
 			PayerID:        req.PayerID,

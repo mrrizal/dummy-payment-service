@@ -18,7 +18,7 @@ func NewFakePaymentProvider() ports.PaymentProvider {
 }
 
 func (p *FakeProvider) Process(ctx context.Context, method string) error {
-	ctx, span := observability.Tracer().
+	_, span := observability.Tracer().
 		Start(ctx, "PaymentProvider.Process")
 	defer span.End()
 
@@ -31,6 +31,7 @@ func (p *FakeProvider) Process(ctx context.Context, method string) error {
 		time.Sleep(400 * time.Millisecond)
 	}
 
+	// #nosec G404
 	if rand.Float64() < 0.15 {
 		err := errors.New("provider failure")
 

@@ -50,7 +50,11 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("failed to connect database: %w", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("failed to close database: %v", err)
+		}
+	}()
 
 	chaosCfg := config.ChaosConfig{
 		Enabled:          true,
