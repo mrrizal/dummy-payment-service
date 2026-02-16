@@ -14,7 +14,7 @@ RUN go build -o app ./cmd/api
 
 
 # ---------- Runtime ----------
-FROM debian:buster
+FROM debian:bullseye
 
 WORKDIR /app
 
