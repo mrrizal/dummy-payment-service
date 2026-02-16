@@ -31,7 +31,7 @@ func (p *FakeProvider) Process(ctx context.Context, method string) error {
 		time.Sleep(400 * time.Millisecond)
 	}
 
-	// nolint:gosec // G404: math/rand is sufficient for chaos injection
+	// #nosec G404
 	if rand.Float64() < 0.15 {
 		err := errors.New("provider failure")
 
