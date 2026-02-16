@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"payment-service/internal/adapters/provider"
@@ -109,6 +110,8 @@ func run() error {
 }
 
 func main() {
+	_ = godotenv.Load()
+
 	if err := run(); err != nil {
 		log.Fatalf("application error: %v", err)
 	}

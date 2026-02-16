@@ -4,4 +4,6 @@ global:
 scrape_configs:
   - job_name: "payment-service"
     static_configs:
-      - targets: ["payment-service:8080"]
+      - targets:
+        - "payment-service-v1:8080"
+        - "payment-service-v2:8080"
