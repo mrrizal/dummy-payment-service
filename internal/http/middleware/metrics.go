@@ -29,6 +29,7 @@ func MetricsMiddleware() gin.HandlerFunc {
 		}
 
 		observability.HTTPRequests.WithLabelValues(
+			observability.ServiceVersion,
 			c.Request.Method,
 			path,
 			status,
@@ -36,6 +37,7 @@ func MetricsMiddleware() gin.HandlerFunc {
 		).Inc()
 
 		observability.HTTPDuration.WithLabelValues(
+			observability.ServiceVersion,
 			c.Request.Method,
 			path,
 			status,

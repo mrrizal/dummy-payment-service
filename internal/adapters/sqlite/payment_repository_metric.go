@@ -23,10 +23,14 @@ func (r *PaymentRepositoryMetrics) Create(ctx context.Context, payment *domain.P
 
 	duration := time.Since(start).Seconds()
 
-	observability.DBQueryDuration.WithLabelValues("insert").Observe(duration)
+	observability.DBQueryDuration.WithLabelValues(
+		observability.ServiceVersion,
+		"insert").Observe(duration)
 
 	if err != nil {
-		observability.DBErrors.WithLabelValues("insert").Inc()
+		observability.DBErrors.WithLabelValues(
+			observability.ServiceVersion,
+			"insert").Inc()
 	}
 
 	return err
@@ -42,10 +46,16 @@ func (r *PaymentRepositoryMetrics) FindByIdempotencyKey(
 
 	duration := time.Since(start).Seconds()
 
-	observability.DBQueryDuration.WithLabelValues("select").Observe(duration)
+	observability.DBQueryDuration.WithLabelValues(
+		observability.ServiceVersion,
+		"select",
+	).Observe(duration)
 
 	if err != nil {
-		observability.DBErrors.WithLabelValues("select").Inc()
+		observability.DBErrors.WithLabelValues(
+			observability.ServiceVersion,
+			"select",
+		).Inc()
 	}
 
 	return payment, err
@@ -61,10 +71,16 @@ func (r *PaymentRepositoryMetrics) FindbyPublicID(
 
 	duration := time.Since(start).Seconds()
 
-	observability.DBQueryDuration.WithLabelValues("select").Observe(duration)
+	observability.DBQueryDuration.WithLabelValues(
+		observability.ServiceVersion,
+		"select",
+	).Observe(duration)
 
 	if err != nil {
-		observability.DBErrors.WithLabelValues("select").Inc()
+		observability.DBErrors.WithLabelValues(
+			observability.ServiceVersion,
+			"select",
+		).Inc()
 	}
 
 	return payment, err
