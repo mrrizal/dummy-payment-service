@@ -108,6 +108,7 @@ func (h *PaymentHandler) Get(c *gin.Context) {
 	defer span.End()
 
 	version := os.Getenv("VERSION")
+	// #nosec G404
 	if version == "2.0.0" && rand.Intn(100) < 40 {
 		err := errors.New("simulated error for version 2.0.0")
 		span.RecordError(err)
