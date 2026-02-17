@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"errors"
+	"math/rand"
 	"net/http"
+	"os"
 	"payment-service/internal/core/usecase"
 	"payment-service/internal/observability"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type createPaymentRequest struct {
@@ -102,6 +106,19 @@ func (h *PaymentHandler) Get(c *gin.Context) {
 	ctx := c.Request.Context()
 	ctx, span := observability.Tracer().Start(ctx, "PaymentHandler.GET")
 	defer span.End()
+
+	version := os.Getenv("VERSION")
+	// #nosec G404
+	if version == "2.0.0" && rand.Intn(100) < 40 {
+		err := errors.New("simulated error for version 2.0.0")
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
 	publicID := c.Param("public_id")
 	payment, err := h.getPaymentUC.Execute(
