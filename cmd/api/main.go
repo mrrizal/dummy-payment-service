@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"payment-service/internal/adapters/provider"
@@ -110,6 +111,9 @@ func run() error {
 }
 
 func main() {
+	token := jwt.New(jwt.SigningMethodHS256)
+	_ = token
+
 	if err := run(); err != nil {
 		log.Fatalf("application error: %v", err)
 	}
